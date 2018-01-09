@@ -130,19 +130,18 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
         RFM_Write(0x08,0x24);
         break;
   }
-
-  /*
+	
   //SF7 BW 250kHz
   RFM_Write(0x1E,0x74); //SF7 CRC On
   RFM_Write(0x1D,0x82); //250 kHz 4/5 coding rate explicit header mode
   RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
-  */
 
+  /*
   //SF10 BW 125 kHz
   RFM_Write(0x1E,0xA4); //SF10 CRC On
   RFM_Write(0x1D,0x72); //125 kHz 4/5 coding rate explicit header mode
   RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
-
+  */
   //Set payload length to the right length
   RFM_Write(0x22,Package_Length);
 
