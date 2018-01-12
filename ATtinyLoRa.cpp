@@ -113,8 +113,8 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   RFM_Write(0x40,0x40);
 
   // change the channel of the RFM module
-  switch (TCNT0 % 3) {
-    case 0x00: //Channel 0 868.100 MHz / 61.035 Hz = 14222987 = 0xD9068B
+  switch (randomNum) {
+      case 0x00: //Channel 0 868.100 MHz / 61.035 Hz = 14222987 = 0xD9068B
         RFM_Write(0x06,0xD9);
         RFM_Write(0x07,0x06);
         RFM_Write(0x08,0x8B);
@@ -129,19 +129,23 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
         RFM_Write(0x07,0x20);
         RFM_Write(0x08,0x24);
         break;
+      case 0x03: //Channel 3 867.100 MHz / 61.035 Hz = 14206603 = 0xD8C68B
+	RFM_Write(0x06,0xD8);
+	RFM_Write(0x07,0xC6);
+	RFM_Write(0x08,0x8B);
+        break;
   }
-	
+  /*	
   //SF7 BW 250kHz
   RFM_Write(0x1E,0x74); //SF7 CRC On
   RFM_Write(0x1D,0x82); //250 kHz 4/5 coding rate explicit header mode
   RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
-
-  /*
+  */
   //SF10 BW 125 kHz
   RFM_Write(0x1E,0xA4); //SF10 CRC On
   RFM_Write(0x1D,0x72); //125 kHz 4/5 coding rate explicit header mode
   RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
-  */
+ 
   //Set payload length to the right length
   RFM_Write(0x22,Package_Length);
 
@@ -507,6 +511,8 @@ void TinyLoRa::Calculate_MIC(unsigned char *Data, unsigned char *Final_MIC, unsi
   Final_MIC[1] = New_Data[1];
   Final_MIC[2] = New_Data[2];
   Final_MIC[3] = New_Data[3];
+	
+  randomNum = Final_MIC[3] & 0x03;
 }
 /*
 *****************************************************************************************
