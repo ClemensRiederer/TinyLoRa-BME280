@@ -14,6 +14,7 @@ class TinyLoRa
 	void sendData(unsigned char *Data, unsigned char Data_Length, unsigned int Frame_Counter_Tx);
 
 	private:
+	uint8_t randomNum;
 	static const unsigned char S_Table[16][16];
 	void RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Package_Length);
 	void RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data);	
