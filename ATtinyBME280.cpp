@@ -77,7 +77,7 @@ void BME280::forceRead( void ) {
     //  + (2.3 * P_oversampling + 0.575)
     //  + (2.4 * H_oversampling + 0.575)
     //  ~ 9.3ms for current settings
-    delay(10);
+    _delay_ms(10);
 }
 
 //****************************************************************************//
