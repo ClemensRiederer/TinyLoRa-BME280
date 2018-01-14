@@ -83,23 +83,23 @@ class BME280
 {
   public:
 
-	int32_t t_fine;
+    int32_t t_fine;
 
-	//This also gets the SensorCalibration constants
+    //This also gets the SensorCalibration constants
     void begin( void );
-
-	// force reading an go to sleep
-	void forceRead( void );
+    
+    // force reading an go to sleep
+    void forceRead( void );
 	
-    //Returns the values as floats.
-    unsigned int readFloatPressure( void );
-	unsigned char readFloatHumidity( void );
-    unsigned int readTempC( void );
+    //Returns the values.
+    unsigned int readPressure( void );
+    unsigned char readHumidity( void );
+    float readTempC( void );
 
-	//Reads one register
+    //Reads one register
     uint8_t readRegister(uint8_t);
 
-	//Writes a byte;
+    //Writes a byte;
     void writeRegister(uint8_t, uint8_t);
     
 };
