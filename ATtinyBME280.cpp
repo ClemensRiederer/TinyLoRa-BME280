@@ -85,7 +85,7 @@ void BME280::forceRead( void ) {
 //  Pressure Section
 //
 //****************************************************************************//
-unsigned int BME280::readFloatPressure( void )
+unsigned int BME280::readPressure( void )
 {
 
   int16_t DIG_P2 = ((int16_t)((readRegister(BME280_DIG_P2_MSB_REG) << 8) + readRegister(BME280_DIG_P2_LSB_REG)));
@@ -93,8 +93,9 @@ unsigned int BME280::readFloatPressure( void )
   int16_t DIG_P6 = ((int16_t)((readRegister(BME280_DIG_P6_MSB_REG) << 8) + readRegister(BME280_DIG_P6_LSB_REG)));
   int16_t DIG_P8 = ((int16_t)((readRegister(BME280_DIG_P8_MSB_REG) << 8) + readRegister(BME280_DIG_P8_LSB_REG)));
   
-  // Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8 fractional bits).
+  // Pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8 fractional bits).
   // Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa
+  // Returns an unsigned int
   int32_t adc_P = ((uint32_t)readRegister(BME280_PRESSURE_MSB_REG) << 12) | ((uint32_t)readRegister(BME280_PRESSURE_LSB_REG) << 4) | ((readRegister(BME280_PRESSURE_XLSB_REG) >> 4) & 0x0F);
   
   int64_t var1, var2, p_acc;
@@ -123,11 +124,12 @@ unsigned int BME280::readFloatPressure( void )
 //  Humidity Section
 //
 //****************************************************************************//
-unsigned char BME280::readFloatHumidity( void )
+unsigned char BME280::readHumidity( void )
 {
   
-  // Returns humidity in %RH as unsigned 32 bit integer in Q22. 10 format (22 integer and 10 fractional bits).
+  // Humidity in %RH as unsigned 32 bit integer in Q22. 10 format (22 integer and 10 fractional bits).
   // Output value of “47445” represents 47445/1024 = 46. 333 %RH
+  // Returns an unsigned char 46 %RH
   int32_t adc_H = ((uint32_t)readRegister(BME280_HUMIDITY_MSB_REG) << 8) | ((uint32_t)readRegister(BME280_HUMIDITY_LSB_REG));
   
   int32_t var1;
@@ -151,7 +153,7 @@ unsigned char BME280::readFloatHumidity( void )
 //
 //****************************************************************************//
 
-unsigned int BME280::readTempC( void )
+float BME280::readTempC( void )
 {
   // Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
   // t_fine carries fine temperature as global value
@@ -166,7 +168,9 @@ unsigned int BME280::readTempC( void )
   var2 = (((((adc_T>>4) - ((int32_t)DIG_T1)) * ((adc_T>>4) - ((int32_t)DIG_T1))) >> 12) * ((int32_t)DIG_T3)) >> 14;
   t_fine = var1 + var2;
   
-  return (t_fine * 5 + 128) >> 8;
+  float output = (t_fine * 5 + 128) >> 8;
+	
+  return output;
 }
 
 uint8_t BME280::readRegister(uint8_t offset)
