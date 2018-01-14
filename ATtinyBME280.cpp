@@ -153,7 +153,7 @@ unsigned char BME280::readHumidity( void )
 //
 //****************************************************************************//
 
-float BME280::readTempC( void )
+int BME280::readTempC( void )
 {
   // Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
   // t_fine carries fine temperature as global value
@@ -167,10 +167,8 @@ float BME280::readTempC( void )
   var1 = ((((adc_T>>3) - ((int32_t)DIG_T1<<1))) * ((int32_t)DIG_T2)) >> 11;
   var2 = (((((adc_T>>4) - ((int32_t)DIG_T1)) * ((adc_T>>4) - ((int32_t)DIG_T1))) >> 12) * ((int32_t)DIG_T3)) >> 14;
   t_fine = var1 + var2;
-  
-  float output = (t_fine * 5 + 128) >> 8;
 	
-  return output;
+  return (t_fine * 5 + 128) >> 8;
 }
 
 uint8_t BME280::readRegister(uint8_t offset)
