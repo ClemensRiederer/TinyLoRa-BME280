@@ -94,7 +94,7 @@ class BME280
     //Returns the values.
     unsigned int readPressure( void );
     unsigned char readHumidity( void );
-    float readTempC( void );
+    int readTempC( void );
 
     //Reads one register
     uint8_t readRegister(uint8_t);
