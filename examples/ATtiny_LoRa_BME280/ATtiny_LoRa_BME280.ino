@@ -47,11 +47,11 @@ void loop()
 
   if (sleep_count >= SLEEP_TOTAL) { 
 
-	bme280.forceRead();
+    bme280.forceRead();
     
-    uint16_t temp = bme280.readTempC();
-    uint8_t hum = bme280.readFloatHumidity();
-    uint16_t pressure = bme280.readFloatPressure();
+    int16_t temp = bme280.readTempC() * 100;
+    uint8_t hum = bme280.readHumidity();
+    uint16_t pressure = bme280.readPressure();
   
     unsigned char Data[5];
     Data[0] = (temp >> 8) & 0xff;
