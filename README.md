@@ -11,7 +11,7 @@ Install the zip file in your Arduino IDE.
 Click on the toolbar menu: Sketch -> Include Library -> Add .ZIP Library -> "downloaded zip file"
 Once done click OK to save and restart the Arduino IDE.
 
-This library uses the tinySPI library http://github.com/JChristensen/tinySPI
+We use the tinySPI library http://github.com/JChristensen/tinySPI
 for communication with the BME280 and the Hope RFM95 module.
 Install this library too.
 
