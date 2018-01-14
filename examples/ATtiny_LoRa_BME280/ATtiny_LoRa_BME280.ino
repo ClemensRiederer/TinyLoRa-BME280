@@ -49,7 +49,7 @@ void loop()
 
     bme280.forceRead();
     
-    int16_t temp = bme280.readTempC() * 100;
+    int16_t temp = bme280.readTempC();
     uint8_t hum = bme280.readHumidity();
     uint16_t pressure = bme280.readPressure();
   
