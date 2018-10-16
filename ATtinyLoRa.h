@@ -12,17 +12,17 @@
 *****************************************************************************************
 */
  /* Set TTN frequecy plan EU863, AU915, AS920, US902 */
- //#define EU863
-//#define US902
-#define AU915
+#define US902
+//#define EU863
+//#define AU915
 //#define AS920
- /* Define fixed datarate */
- //#define SF12BW125
+/* Define fixed datarate */
+#define SF7BW125
+//#define SF12BW125
 //#define SF11BW125
 //#define SF10BW125
 //#define SF9BW125
 //#define SF8BW125
-#define SF7BW125
 //#define SF7BW250
 
  /*
