@@ -1,8 +1,8 @@
 #ifndef PINS_H
 #define PINS_H
 
-/*** ATmega328p ******/
-#define DIO0 8     
-#define NSS_RFM 9     
+/*** Feather 32U4 RFM LoRa ******/
+#define DIO0 PE6
+#define NSS_RFM PB4  
 
 #endif
