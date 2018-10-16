@@ -14,7 +14,7 @@
 * You should have received a copy of the GNU Lesser General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************************/
-#include "ATtinyLoRa.h"
+#include "TinyLoRa.h"
 #include <SPI.h>   // ATmega328p
 
 extern uint8_t NwkSkey[16];
@@ -121,10 +121,10 @@ void TinyLoRa::begin()
   PORTB |= (1<<NSS_RFM);
 
   //Switch RFM to sleep
-  RFM_Write(0x01,0x00);
+  RFM_Write(0x01,MODE_SLEEP);
 
   //Set RFM in LoRa mode
-  RFM_Write(0x01,0x80);
+  RFM_Write(0x01,MODE_LORA);
 
   //PA pin (maximal power)
   RFM_Write(0x09,0xFF);
@@ -134,8 +134,8 @@ void TinyLoRa::begin()
 
   //Preamble length set to 8 symbols
   //0x0008 + 4 = 12
-  RFM_Write(0x20,0x00);
-  RFM_Write(0x21,0x08);
+  RFM_Write(REG_PREAMBLE_MSB,0x00);
+  RFM_Write(REG_PREAMBLE_LSB,0x08);
 
   //Low datarate optimization off AGC auto on
   RFM_Write(0x26,0x0C);
@@ -174,7 +174,7 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   unsigned char i;
 
   //Set RFM in Standby mode wait on mode ready
-  RFM_Write(0x01,0x81);
+  RFM_Write(MODE_STDBY,0x81);
   
   // wait for standby mode
   _delay_ms(10);
@@ -242,13 +242,13 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
     RFM_Tx_Package++;
   }
   //Switch RFM to Tx
-  RFM_Write(0x01,0x83);
+  RFM_Write(0x01,MODE_TX);
   //Wait for TxDone
   while(digitalRead(DIO0) == LOW)
   {
   }
   //Switch RFM to sleep
-  RFM_Write(0x01,0x00);
+  RFM_Write(0x01,MODE_SLEEP);
 }
 
 /*

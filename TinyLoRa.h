@@ -1,22 +1,21 @@
 #ifndef TINY_LORA_H
 #define TINY_LORA_H
 
-#include "Pins.h"
 #include <Arduino.h>
 #include <util/delay.h>
 #include <avr/pgmspace.h>
 
-/*
-*****************************************************************************************
-* Description: TinyLora Configuration Options
-*****************************************************************************************
-*/
- /* Set TTN frequecy plan EU863, AU915, AS920, US902 */
+/* RFM95 Pin Configuration */
+#define DIO0 PE6
+#define NSS_RFM PB4  
+
+/* TTN Configuration */
+// Set TTN frequecy plan EU863, AU915, AS920, US902
 #define US902
 //#define EU863
 //#define AU915
 //#define AS920
-/* Define fixed datarate */
+// Define fixed datarate
 #define SF7BW125
 //#define SF12BW125
 //#define SF11BW125
@@ -25,11 +24,18 @@
 //#define SF8BW125
 //#define SF7BW250
 
- /*
-*****************************************************************************************
-* Description: TinyLora Class
-*****************************************************************************************
-*/
+/* RFM Modes */
+#define MODE_SLEEP  0x00
+#define MODE_LORA   0x80
+#define MODE_STDBY  0x01
+#define MODE_TX     0x83
+
+/* RFM Registers */
+#define REG_PA_CONFIG            0x09
+#define REG_PREAMBLE_MSB         0x20
+#define REG_PREAMBLE_LSB         0x21
+
+ /* TinyLoRa Class */
 class TinyLoRa
 {
 	public:
