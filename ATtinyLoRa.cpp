@@ -15,8 +15,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************************/
 #include "ATtinyLoRa.h"
-#include <tinySPI.h> //ATtiny85
-//#include <SPI.h>   // ATmega328p
+#include <SPI.h>   // ATmega328p
 
 extern uint8_t NwkSkey[16];
 extern uint8_t AppSkey[16];

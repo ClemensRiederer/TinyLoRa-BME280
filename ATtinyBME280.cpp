@@ -21,8 +21,7 @@ Distributed as-is; no warranty is given.
 //See SparkFunBME280.h for additional topology notes.
 
 #include "ATtinyBME280.h"
-#include <tinySPI.h> // use for ATtiny
-//#include <SPI.h> // use for ATmega
+#include <SPI.h> // use for ATmega
 
 
 //****************************************************************************//

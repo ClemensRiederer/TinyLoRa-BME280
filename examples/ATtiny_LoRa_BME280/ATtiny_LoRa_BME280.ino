@@ -2,7 +2,7 @@
 #include <ATtinyLoRa.h>
 #include <avr/sleep.h>
 #include <avr/wdt.h>
-#include <tinySPI.h>
+#include <SPI.h>
 
 #define SLEEP_TOTAL 113 // 113*8s = 904s ~15min
 
