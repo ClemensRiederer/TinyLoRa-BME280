@@ -5,6 +5,8 @@
 #include <util/delay.h>
 #include <avr/pgmspace.h>
 
+#define DEBUG
+
 /* RFM95 Pin Configuration */
 #define DIO0 PE6
 #define NSS_RFM PB4  
@@ -34,8 +36,11 @@
 #define REG_PA_CONFIG            0x09
 #define REG_PREAMBLE_MSB         0x20
 #define REG_PREAMBLE_LSB         0x21
+#define RegFrfMsb                0x06
+#define RegFrfMid                0x07
+#define RegFrfLsb                0x08
 
- /* TinyLoRa Class */
+/* TinyLoRa Class */
 class TinyLoRa
 {
 	public:

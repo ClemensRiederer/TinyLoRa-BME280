@@ -161,6 +161,7 @@ void TinyLoRa::begin()
   Serial.println("> RFM module initialized");
 
 }
+
 /*
 *****************************************************************************************
 * Description : Function for sending a package with the RFM
@@ -182,10 +183,18 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   //Switch DIO0 to TxDone
   RFM_Write(0x40,0x40);
 
+  // Single Channel Send on CH6, 905.100 mHz
+  RFM_Write(RegFrfMsb, 0xE2);
+  RFM_Write(RegFrfMid, 0x46);
+  RFM_Write(RegFrfLsb, 0x8C);
+
   // change the channel of the RFM module
-  RFM_Write(0x06, pgm_read_byte(&(LoRa_Frequency[randomNum][0])));
-  RFM_Write(0x07, pgm_read_byte(&(LoRa_Frequency[randomNum][1])));
-  RFM_Write(0x08, pgm_read_byte(&(LoRa_Frequency[randomNum][2])));
+  // br: carrier freq split between 0x06, 0x07, 0x08
+  /*
+  RFM_Write(RegFrfMsb, pgm_read_byte(&(LoRa_Frequency[randomNum][0])));
+  RFM_Write(RegFrfMid, pgm_read_byte(&(LoRa_Frequency[randomNum][1])));
+  RFM_Write(RegFrfLsb, pgm_read_byte(&(LoRa_Frequency[randomNum][2])));
+  */
 
   #ifdef SF12BW125 //SF12 BW 125 kHz
     RFM_Write(0x1E,0xC4); //SF12 CRC On
@@ -243,7 +252,7 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   }
   //Switch RFM to Tx
   RFM_Write(0x01,MODE_TX);
-  //Wait for TxDone
+  //Wait for TxDone 
   while(digitalRead(DIO0) == LOW)
   {
   }
@@ -261,8 +270,17 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
 */
 void TinyLoRa::RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data) 
 {
+  // br: debug
+  #ifdef debug
+    Serial.print("SPI Write ADDR: ");
+  #endif
+
+  Serial.print(RFM_Address, HEX);
+  Serial.print(" DATA: ");
+  Serial.println(RFM_Data, HEX);
+
   //Set NSS pin Low to start communication
-  digitalWrite(NSS_RFM,LOW);
+  PORTB |= (0 << NSS_RFM);
 
   //Send Addres with MSB 1 to make it a writ command
   SPI.transfer(RFM_Address | 0x80);
@@ -270,7 +288,7 @@ void TinyLoRa::RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data)
   SPI.transfer(RFM_Data);
 
   //Set NSS pin High to end communication
-  digitalWrite(NSS_RFM,HIGH);
+  PORTB |= (1 << NSS_RFM);
 }
 /*
 *****************************************************************************************
