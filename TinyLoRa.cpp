@@ -114,11 +114,13 @@ static const unsigned char PROGMEM TinyLoRa::S_Table[16][16] = {
 void TinyLoRa::begin() 
 {
   // RFM95 ss as output
-  DDRB |= (1<<NSS_RFM);
-  // RFM95 DIO0 as input
-  DDRB &= ~(1<<DIO0);
+  pinMode(NSS_RFM, OUTPUT);
+
   // set ss high
-  PORTB |= (1<<NSS_RFM);
+  digitalWrite(NSS_RFM, 1);
+
+  // RFM95 DIO0 as input
+  pinMode(DIO0, OUTPUT);
 
   //Switch RFM to sleep
   RFM_Write(0x01,MODE_SLEEP);
@@ -158,7 +160,9 @@ void TinyLoRa::begin()
 
   // init tx random number for first use
   uint8_t txrandomNum = 0x00;
-  Serial.println("> RFM module initialized");
+  #ifdef DEBUG
+  Serial.println("> RFM module initialized"); 
+  #endif
 
 }
 
@@ -178,23 +182,25 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   RFM_Write(MODE_STDBY,0x81);
   
   // wait for standby mode
-  _delay_ms(10);
+  delay(10);
   
   //Switch DIO0 to TxDone
   RFM_Write(0x40,0x40);
 
-  // Single Channel Send on CH6, 905.100 mHz
-  RFM_Write(RegFrfMsb, 0xE2);
-  RFM_Write(RegFrfMid, 0x46);
-  RFM_Write(RegFrfLsb, 0x8C);
+  // Single Channel Send on CH6, 903.9MHz
+  #ifdef SGLCH 
+    RFM_Write(RegFrfMsb, 0xE1);
+    RFM_Write(RegFrfMid, 0xF9);
+    RFM_Write(RegFrfLsb, 0xC0);
+  #endif
 
-  // change the channel of the RFM module
-  // br: carrier freq split between 0x06, 0x07, 0x08
-  /*
-  RFM_Write(RegFrfMsb, pgm_read_byte(&(LoRa_Frequency[randomNum][0])));
-  RFM_Write(RegFrfMid, pgm_read_byte(&(LoRa_Frequency[randomNum][1])));
-  RFM_Write(RegFrfLsb, pgm_read_byte(&(LoRa_Frequency[randomNum][2])));
-  */
+  #ifdef FULLCH
+    // change the channel of the RFM module
+    // br: carrier freq split between 0x06, 0x07, 0x08
+    RFM_Write(RegFrfMsb, pgm_read_byte(&(LoRa_Frequency[randomNum][0])));
+    RFM_Write(RegFrfMid, pgm_read_byte(&(LoRa_Frequency[randomNum][1])));
+    RFM_Write(RegFrfLsb, pgm_read_byte(&(LoRa_Frequency[randomNum][2])));
+  #endif 
 
   #ifdef SF12BW125 //SF12 BW 125 kHz
     RFM_Write(0x1E,0xC4); //SF12 CRC On
@@ -252,9 +258,11 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   }
   //Switch RFM to Tx
   RFM_Write(0x01,MODE_TX);
+  Serial.println("Waiting for DIO0 to pull high");
   //Wait for TxDone 
   while(digitalRead(DIO0) == LOW)
   {
+    
   }
   //Switch RFM to sleep
   RFM_Write(0x01,MODE_SLEEP);
@@ -270,25 +278,30 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
 */
 void TinyLoRa::RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data) 
 {
-  // br: debug
-  #ifdef debug
+  // br: SPI Transfer Debug
+  #ifdef DEBUG
     Serial.print("SPI Write ADDR: ");
+    Serial.print(RFM_Address, HEX);
+    Serial.print(" DATA: ");
+    Serial.println(RFM_Data, HEX);
   #endif
 
-  Serial.print(RFM_Address, HEX);
-  Serial.print(" DATA: ");
-  Serial.println(RFM_Data, HEX);
-
   //Set NSS pin Low to start communication
-  PORTB |= (0 << NSS_RFM);
+  digitalWrite(NSS_RFM, 0);
 
-  //Send Addres with MSB 1 to make it a writ command
+  // br: SPI Transfer Debug
+  #ifdef DEBUG
+    Serial.print("SPI Write ADDR: ");
+    Serial.print(RFM_Address, HEX);
+  #endif
+
+  //Send Address with MSB 1 to make it a writ command
   SPI.transfer(RFM_Address | 0x80);
   //Send Data
   SPI.transfer(RFM_Data);
 
   //Set NSS pin High to end communication
-  PORTB |= (1 << NSS_RFM);
+  digitalWrite(NSS_RFM, 1);
 }
 /*
 *****************************************************************************************
@@ -345,6 +358,8 @@ void TinyLoRa::sendData(unsigned char *Data, unsigned char Data_Length, unsigned
 
   //Add data Lenth to package length
   RFM_Package_Length = RFM_Package_Length + Data_Length;
+  Serial.print("Package length: ");
+  Serial.println(RFM_Package_Length);
   
   //Calculate MIC
   Calculate_MIC(RFM_Data, MIC, RFM_Package_Length, Frame_Counter_Tx, Direction);

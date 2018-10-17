@@ -5,11 +5,18 @@
 #include <util/delay.h>
 #include <avr/pgmspace.h>
 
+// debugging, unset if you don't need this.
 #define DEBUG
 
-/* RFM95 Pin Configuration */
-#define DIO0 PE6
-#define NSS_RFM PB4  
+// enable single-channel frequency sending
+#define SGLCH
+
+// enable full-channel frequency sending
+// #define FULLCH
+
+/* RFM95 Pin Configuration for 32u4 LoRa Feather */
+#define DIO0 7
+#define NSS_RFM 8  
 
 /* TTN Configuration */
 // Set TTN frequecy plan EU863, AU915, AS920, US902
@@ -18,13 +25,13 @@
 //#define AU915
 //#define AS920
 // Define fixed datarate
-#define SF7BW125
+//#define SF7BW125
 //#define SF12BW125
 //#define SF11BW125
 //#define SF10BW125
 //#define SF9BW125
 //#define SF8BW125
-//#define SF7BW250
+#define SF7BW250
 
 /* RFM Modes */
 #define MODE_SLEEP  0x00
