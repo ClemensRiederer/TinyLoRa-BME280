@@ -116,7 +116,8 @@ void TinyLoRa::begin()
   // RFM95 ss as output
   pinMode(NSS_RFM, OUTPUT);
 
-  // set ss high
+  // toggle SS
+  digitalWrite(NSS_RFM, 0);
   digitalWrite(NSS_RFM, 1);
 
   // RFM95 DIO0 as input
@@ -187,62 +188,63 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   //Switch DIO0 to TxDone
   RFM_Write(0x40,0x40);
 
-  // Single Channel Send on CH6, 903.9MHz
-  #ifdef SGLCH 
-    RFM_Write(RegFrfMsb, 0xE1);
-    RFM_Write(RegFrfMid, 0xF9);
-    RFM_Write(RegFrfLsb, 0xC0);
-  #endif
+// Single Channel Send on CH6, 903.9MHz
+// 0xE1, 0xF9, 0xC0
+#ifdef SGLCH
+  RFM_Write(RegFrfMsb, 0xE1);
+  RFM_Write(RegFrfMid, 0xF9);
+  RFM_Write(RegFrfLsb, 0xC0);
+#endif
 
-  #ifdef FULLCH
-    // change the channel of the RFM module
-    // br: carrier freq split between 0x06, 0x07, 0x08
-    RFM_Write(RegFrfMsb, pgm_read_byte(&(LoRa_Frequency[randomNum][0])));
-    RFM_Write(RegFrfMid, pgm_read_byte(&(LoRa_Frequency[randomNum][1])));
-    RFM_Write(RegFrfLsb, pgm_read_byte(&(LoRa_Frequency[randomNum][2])));
-  #endif 
+#ifdef FULLCH
+  // change the channel of the RFM module
+  // br: carrier freq split between 0x06, 0x07, 0x08
+  RFM_Write(RegFrfMsb, pgm_read_byte(&(LoRa_Frequency[randomNum][0])));
+  RFM_Write(RegFrfMid, pgm_read_byte(&(LoRa_Frequency[randomNum][1])));
+  RFM_Write(RegFrfLsb, pgm_read_byte(&(LoRa_Frequency[randomNum][2])));
+#endif
 
-  #ifdef SF12BW125 //SF12 BW 125 kHz
-    RFM_Write(0x1E,0xC4); //SF12 CRC On
-    RFM_Write(0x1D,0x72); //125 kHz 4/5 coding rate explicit header mode
-    RFM_Write(0x26,0x0C); //Low datarate optimization on AGC auto on
-  #endif 
+#ifdef SF12BW125         //SF12 BW 125 kHz
+  RFM_Write(0x1E, 0xC4); //SF12 CRC On
+  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
+  RFM_Write(0x26, 0x0C); //Low datarate optimization on AGC auto on
+#endif
 
-  #ifdef SF11BW125 //SF11 BW 125 kHz
-    RFM_Write(0x1E,0xB4); //SF11 CRC On
-    RFM_Write(0x1D,0x72); //125 kHz 4/5 coding rate explicit header mode
-    RFM_Write(0x26,0x0C); //Low datarate optimization on AGC auto on
-  #endif
+#ifdef SF11BW125         //SF11 BW 125 kHz
+  RFM_Write(0x1E, 0xB4); //SF11 CRC On
+  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
+  RFM_Write(0x26, 0x0C); //Low datarate optimization on AGC auto on
+#endif
 
-  #ifdef SF10BW125 //SF10 BW 125 kHz
-    RFM_Write(0x1E,0xA4); //SF10 CRC On
-    RFM_Write(0x1D,0x72); //125 kHz 4/5 coding rate explicit header mode
-    RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
-  #endif
+#ifdef SF10BW125         //SF10 BW 125 kHz
+  RFM_Write(0x1E, 0xA4); //SF10 CRC On
+  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
+  RFM_Write(0x26, 0x04); //Low datarate optimization off AGC auto on
+#endif
 
-  #ifdef SF9BW125 //SF9 BW 125 kHz
-    RFM_Write(0x1E,0x94); //SF9 CRC On
-    RFM_Write(0x1D,0x72); //125 kHz 4/5 coding rate explicit header mode
-    RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
-  #endif
+#ifdef SF9BW125          //SF9 BW 125 kHz
+  RFM_Write(0x1E, 0x94); //SF9 CRC On
+  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
+  RFM_Write(0x26, 0x04); //Low datarate optimization off AGC auto on
+#endif
 
-  #ifdef SF8BW125 //SF8 BW 125 kHz
-    RFM_Write(0x1E,0x84); //SF8 CRC On
-    RFM_Write(0x1D,0x72); //125 kHz 4/5 coding rate explicit header mode
-    RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
-  #endif
+#ifdef SF8BW125          //SF8 BW 125 kHz
+  RFM_Write(0x1E, 0x84); //SF8 CRC On
+  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
+  RFM_Write(0x26, 0x04); //Low datarate optimization off AGC auto on
+#endif
 
-  #ifdef SF7BW125 //SF7 BW 125 kHz
-    RFM_Write(0x1E,0x74); //SF7 CRC On
-    RFM_Write(0x1D,0x72); //125 kHz 4/5 coding rate explicit header mode
-    RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
-  #endif
+#ifdef SF7BW125          //SF7 BW 125 kHz
+  RFM_Write(0x1E, 0x74); //SF7 CRC On
+  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
+  RFM_Write(0x26, 0x04); //Low datarate optimization off AGC auto on
+#endif
 
-  #ifdef SF7BW250 //SF7 BW 250kHz
-    RFM_Write(0x1E,0x74); //SF7 CRC On
-    RFM_Write(0x1D,0x82); //250 kHz 4/5 coding rate explicit header mode
-    RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
-  #endif 
+#ifdef SF7BW250          //SF7 BW 250kHz
+  RFM_Write(0x1E, 0x74); //SF7 CRC On
+  RFM_Write(0x1D, 0x82); //250 kHz 4/5 coding rate explicit header mode
+  RFM_Write(0x26, 0x04); //Low datarate optimization off AGC auto on
+#endif 
 
   //Set payload length to the right length
   RFM_Write(0x22,Package_Length);
@@ -375,7 +377,7 @@ void TinyLoRa::sendData(unsigned char *Data, unsigned char Data_Length, unsigned
  
   //Send Package
   RFM_Send_Package(RFM_Data, RFM_Package_Length);
-  Serial.print("sent package!");
+  Serial.println("sent package!");
 }
 /*
 *****************************************************************************************
