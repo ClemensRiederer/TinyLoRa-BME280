@@ -116,10 +116,6 @@ void TinyLoRa::begin()
   // RFM95 ss as output
   pinMode(NSS_RFM, OUTPUT);
 
-  // toggle SS
-  digitalWrite(NSS_RFM, 0);
-  digitalWrite(NSS_RFM, 1);
-
   // RFM95 DIO0 as input
   pinMode(DIO0, OUTPUT);
 
@@ -162,9 +158,8 @@ void TinyLoRa::begin()
   // init tx random number for first use
   uint8_t txrandomNum = 0x00;
   #ifdef DEBUG
-  Serial.println("> RFM module initialized"); 
+    Serial.println("* Initialized RFM module");
   #endif
-
 }
 
 /*
@@ -182,69 +177,67 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   //Set RFM in Standby mode wait on mode ready
   RFM_Write(MODE_STDBY,0x81);
   
-  // wait for standby mode
+  //wait for standby mode
   delay(10);
   
   //Switch DIO0 to TxDone
   RFM_Write(0x40,0x40);
 
-// Single Channel Send on CH6, 903.9MHz
-// 0xE1, 0xF9, 0xC0
-#ifdef SGLCH
-  RFM_Write(RegFrfMsb, 0xE1);
-  RFM_Write(RegFrfMid, 0xF9);
-  RFM_Write(RegFrfLsb, 0xC0);
-#endif
+  // Single-Channel Package Sending
+  #ifdef SINGLECH
+    RFM_Write(RegFrfMsb, 0xE1);
+    RFM_Write(RegFrfMid, 0xF9);
+    RFM_Write(RegFrfLsb, 0xC0);
+  #endif
 
-#ifdef FULLCH
-  // change the channel of the RFM module
-  // br: carrier freq split between 0x06, 0x07, 0x08
-  RFM_Write(RegFrfMsb, pgm_read_byte(&(LoRa_Frequency[randomNum][0])));
-  RFM_Write(RegFrfMid, pgm_read_byte(&(LoRa_Frequency[randomNum][1])));
-  RFM_Write(RegFrfLsb, pgm_read_byte(&(LoRa_Frequency[randomNum][2])));
-#endif
+  // Multi Channel Package Sending
+  #ifdef MULTICH
+    RFM_Write(RegFrfMsb, pgm_read_byte(&(LoRa_Frequency[randomNum][0])));
+    RFM_Write(RegFrfMid, pgm_read_byte(&(LoRa_Frequency[randomNum][1])));
+    RFM_Write(RegFrfLsb, pgm_read_byte(&(LoRa_Frequency[randomNum][2])));
+  #endif
 
-#ifdef SF12BW125         //SF12 BW 125 kHz
-  RFM_Write(0x1E, 0xC4); //SF12 CRC On
-  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
-  RFM_Write(0x26, 0x0C); //Low datarate optimization on AGC auto on
-#endif
+  #ifdef SF12BW125         //SF12 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0xC4); //SF12 CRC On
+    RFM_Write(RegModemConfig1, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x0C); //Low datarate optimization on AGC auto on
+  #endif
 
-#ifdef SF11BW125         //SF11 BW 125 kHz
-  RFM_Write(0x1E, 0xB4); //SF11 CRC On
-  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
-  RFM_Write(0x26, 0x0C); //Low datarate optimization on AGC auto on
-#endif
+  #ifdef SF11BW125         //SF11 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0xB4); //SF11 CRC On
+    RFM_Write(RegModemConfig1, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x0C); //Low datarate optimization on AGC auto on
+  #endif
 
-#ifdef SF10BW125         //SF10 BW 125 kHz
-  RFM_Write(0x1E, 0xA4); //SF10 CRC On
-  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
-  RFM_Write(0x26, 0x04); //Low datarate optimization off AGC auto on
-#endif
+  #ifdef SF10BW125         //SF10 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0xA4); //SF10 CRC On
+    RFM_Write(RegModemConfig1, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x04); //Low datarate optimization off AGC auto on
+  #endif
 
-#ifdef SF9BW125          //SF9 BW 125 kHz
-  RFM_Write(0x1E, 0x94); //SF9 CRC On
-  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
-  RFM_Write(0x26, 0x04); //Low datarate optimization off AGC auto on
-#endif
+  #ifdef SF9BW125          //SF9 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0x94); //SF9 CRC On
+    RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x04); //Low datarate optimization off AGC auto on
+  #endif
 
-#ifdef SF8BW125          //SF8 BW 125 kHz
-  RFM_Write(0x1E, 0x84); //SF8 CRC On
-  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
-  RFM_Write(0x26, 0x04); //Low datarate optimization off AGC auto on
-#endif
+  #ifdef SF8BW125          //SF8 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0x84); //SF8 CRC On
+    RFM_Write(RegModemConfig1, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x04); //Low datarate optimization off AGC auto on
+  #endif
 
-#ifdef SF7BW125          //SF7 BW 125 kHz
-  RFM_Write(0x1E, 0x74); //SF7 CRC On
-  RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
-  RFM_Write(0x26, 0x04); //Low datarate optimization off AGC auto on
-#endif
+  #ifdef SF7BW125          //SF7 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0x74); //SF7 CRC On
+    RFM_Write(RegModemConfig1, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x04); //Low datarate optimization off AGC auto on
+  #endif
 
-#ifdef SF7BW250          //SF7 BW 250kHz
-  RFM_Write(0x1E, 0x74); //SF7 CRC On
-  RFM_Write(0x1D, 0x82); //250 kHz 4/5 coding rate explicit header mode
-  RFM_Write(0x26, 0x04); //Low datarate optimization off AGC auto on
-#endif 
+  #ifdef SF7BW250          //SF7 BW 250kHz
+    RFM_Write(RegModemConfig2, 0x74); //SF7 CRC On
+    RFM_Write(RegModemConfig1, 0x82); //250 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x04); //Low datarate optimization off AGC auto on
+  #endif 
 
   //Set payload length to the right length
   RFM_Write(0x22,Package_Length);
@@ -260,8 +253,8 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   }
   //Switch RFM to Tx
   RFM_Write(0x01,MODE_TX);
-  Serial.println("Waiting for DIO0 to pull high");
-  //Wait for TxDone 
+
+  //Wait DIO0 to pull high
   while(digitalRead(DIO0) == LOW)
   {
     
@@ -280,24 +273,15 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
 */
 void TinyLoRa::RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data) 
 {
-  // br: SPI Transfer Debug
   #ifdef DEBUG
-    Serial.print("SPI Write ADDR: ");
-    Serial.print(RFM_Address, HEX);
-    Serial.print(" DATA: ");
-    Serial.println(RFM_Data, HEX);
+    Serial.print("* SPI Write | Address: ");Serial.print(RFM_Address, HEX);
+    Serial.print(" | DATA: ");Serial.println(RFM_Data, HEX);
   #endif
 
   //Set NSS pin Low to start communication
   digitalWrite(NSS_RFM, 0);
 
-  // br: SPI Transfer Debug
-  #ifdef DEBUG
-    Serial.print("SPI Write ADDR: ");
-    Serial.print(RFM_Address, HEX);
-  #endif
-
-  //Send Address with MSB 1 to make it a writ command
+  //Send Address with MSB 1 to make it a write command
   SPI.transfer(RFM_Address | 0x80);
   //Send Data
   SPI.transfer(RFM_Data);
