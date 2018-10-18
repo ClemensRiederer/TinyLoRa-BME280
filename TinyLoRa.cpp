@@ -111,13 +111,19 @@ static const unsigned char PROGMEM TinyLoRa::S_Table[16][16] = {
 * Description: Function used to initialize the RFM module on startup
 *****************************************************************************************
 */
+
+TinyLoRa::TinyLoRa(int8_t rfm__irq, int8_t rfm_nss) {
+  _irq = rfm__irq;
+  _cs = rfm_nss;
+}
+
 void TinyLoRa::begin() 
 {
   // RFM95 ss as output
-  pinMode(NSS_RFM, OUTPUT);
+  pinMode(_cs, OUTPUT);
 
-  // RFM95 DIO0 as input
-  pinMode(DIO0, OUTPUT);
+  // RFM95 _irq as input
+  pinMode(_irq, OUTPUT);
 
   //Switch RFM to sleep
   RFM_Write(0x01,MODE_SLEEP);
@@ -180,7 +186,7 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   //wait for standby mode
   delay(10);
   
-  //Switch DIO0 to TxDone
+  //Switch _irq to TxDone
   RFM_Write(0x40,0x40);
 
   // Single-Channel Package Sending
@@ -254,8 +260,8 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   //Switch RFM to Tx
   RFM_Write(0x01,MODE_TX);
 
-  //Wait DIO0 to pull high
-  while(digitalRead(DIO0) == LOW)
+  //Wait _irq to pull high
+  while(digitalRead(_irq) == LOW)
   {
     
   }
@@ -279,7 +285,7 @@ void TinyLoRa::RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data)
   #endif
 
   //Set NSS pin Low to start communication
-  digitalWrite(NSS_RFM, 0);
+  digitalWrite(_cs, 0);
 
   //Send Address with MSB 1 to make it a write command
   SPI.transfer(RFM_Address | 0x80);
@@ -287,7 +293,7 @@ void TinyLoRa::RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data)
   SPI.transfer(RFM_Data);
 
   //Set NSS pin High to end communication
-  digitalWrite(NSS_RFM, 1);
+  digitalWrite(_cs, 1);
 }
 /*
 *****************************************************************************************

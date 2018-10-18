@@ -5,18 +5,11 @@
 #include <util/delay.h>
 #include <avr/pgmspace.h>
 
-// Enable library debugging
+// debugging, unset if you don't need this.
 //#define DEBUG
-
-// pin configuration (defaults to feather 32u4 pinmap)
-#define DIO0 7
-#define NSS_RFM 8
 
 // Multi-Channel Package Sending (default)
 #define MULTICH
-
-// Single-Channel Package Sending
-//#define SINGLECH
 
 /* TTN Configuration */
 // Set TTN frequency plan
@@ -58,11 +51,13 @@ class TinyLoRa
 	public:
 		uint8_t txrandomNum;
 		uint16_t frameCounter;
+		TinyLoRa(int8_t rfm_dio0, int8_t rfm_nss);
 		void begin(void);
 		void sendData(unsigned char *Data, unsigned char Data_Length, unsigned int Frame_Counter_Tx);
 
 	private:
 		uint8_t randomNum;
+		int8_t _cs, _irq;
 		static const unsigned char LoRa_Frequency[8][3];
 		static const unsigned char S_Table[16][16];
 		void RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Package_Length);
