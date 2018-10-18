@@ -12,10 +12,6 @@
 #include <TinyLoRa.h>
 #include <SPI.h>
 
-// Feather 32u4 LoRA Pins
-#define DIO0      7
-#define NSS_RFM   8
-
 // Network Session Key (MSB)
 uint8_t NwkSkey[16] = { FILL_THIS_IN };
 
@@ -32,8 +28,8 @@ unsigned char loraData[11] = {"hello LoRa"};
 // How many times data transfer should occur, in seconds
 const unsigned int sendInterval = 30;
 
-// Global LoRaWan object
-TinyLoRa lora;
+// LoRa Object - (RFM DIO0, RFM NSS)
+TinyLoRa lora = TinyLoRa(7, 8);
 
 void setup()
 {

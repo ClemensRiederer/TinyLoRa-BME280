@@ -6,17 +6,10 @@
 #include <avr/pgmspace.h>
 
 // debugging, unset if you don't need this.
-#define DEBUG
+//#define DEBUG
 
-// enable single-channel frequency sending
-#define SGLCH
-
-// enable full-channel frequency sending
-// #define FULLCH
-
-/* RFM95 Pin Configuration for 32u4 LoRa Feather */
-#define DIO0 7
-#define NSS_RFM 8  
+// Multi-Channel Package Sending (default)
+#define MULTICH
 
 /* TTN Configuration */
 // Set TTN frequecy plan EU863, AU915, AS920, US902
@@ -53,11 +46,13 @@ class TinyLoRa
 	public:
 		uint8_t txrandomNum;
 		uint16_t frameCounter;
+		TinyLoRa(int8_t rfm_dio0, int8_t rfm_nss);
 		void begin(void);
 		void sendData(unsigned char *Data, unsigned char Data_Length, unsigned int Frame_Counter_Tx);
 
 	private:
 		uint8_t randomNum;
+		int8_t _cs, _irq;
 		static const unsigned char LoRa_Frequency[8][3];
 		static const unsigned char S_Table[16][16];
 		void RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Package_Length);
