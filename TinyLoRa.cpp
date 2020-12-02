@@ -14,13 +14,72 @@
 * You should have received a copy of the GNU Lesser General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************************/
-#include "ATtinyLoRa.h"
-#include <tinySPI.h> //ATtiny85
-//#include <SPI.h>     // ATmega328p
+#include "TinyLoRa.h"
+#include <SPI.h>   // ATmega328p
 
 extern uint8_t NwkSkey[16];
 extern uint8_t AppSkey[16];
 extern uint8_t DevAddr[4];
+
+/*
+*****************************************************************************************
+* Description: TTN regional frequency plans
+*****************************************************************************************
+*/
+
+#ifdef AU915
+static const unsigned char PROGMEM TinyLoRa::LoRa_Frequency[8][3] = {
+	{ 0xE5, 0x33, 0x5A },	//Channel 0 916.800 MHz / 61.035 Hz = 15020890 = 0xE5335A
+	{ 0xE5, 0x40, 0x26 },	//Channel 2 917.000 MHz / 61.035 Hz = 15024166 = 0xE54026
+	{ 0xE5, 0x4C, 0xF3 },	//Channel 3 917.200 MHz / 61.035 Hz = 15027443 = 0xE54CF3
+	{ 0xE5, 0x59, 0xC0 },	//Channel 4 917.400 MHz / 61.035 Hz = 15030720 = 0xE559C0
+	{ 0xE5, 0x66, 0x8D },	//Channel 5 917.600 MHz / 61.035 Hz = 15033997 = 0xE5668D
+	{ 0xE5, 0x73, 0x5A },	//Channel 6 917.800 MHz / 61.035 Hz = 15037274 = 0xE5735A
+	{ 0xE5, 0x80, 0x27 },	//Channel 7 918.000 MHz / 61.035 Hz = 15040551 = 0xE58027
+	{ 0xE5, 0x8C, 0xF3 }	//Channel 8 918.200 MHz / 61.035 Hz = 15043827 = 0xE58CF3
+};
+#endif
+
+#ifdef EU863
+static const unsigned char PROGMEM TinyLoRa::LoRa_Frequency[8][3] = {
+	{ 0xD9, 0x06, 0x8B },	//Channel 0 868.100 MHz / 61.035 Hz = 14222987 = 0xD9068B
+	{ 0xD9, 0x13, 0x58 },	//Channel 1 868.300 MHz / 61.035 Hz = 14226264 = 0xD91358
+	{ 0xD9, 0x20, 0x24 },	//Channel 2 868.500 MHz / 61.035 Hz = 14229540 = 0xD92024
+	{ 0xD8, 0xC6, 0x8B },	//Channel 3 867.100 MHz / 61.035 Hz = 14206603 = 0xD8C68B
+	{ 0xD8, 0xD3, 0x58 },	//Channel 4 867.300 MHz / 61.035 Hz = 14209880 = 0xD8D358
+	{ 0xD8, 0xE0, 0x24 },	//Channel 5 867.500 MHz / 61.035 Hz = 14213156 = 0xD8E024
+	{ 0xD8, 0xEC, 0xF1 },	//Channel 6 867.700 MHz / 61.035 Hz = 14216433 = 0xD8ECF1
+	{ 0xD8, 0xF9, 0xBE }	//Channel 7 867.900 MHz / 61.035 Hz = 14219710 = 0xD8F9BE
+
+};
+#endif
+
+#ifdef US902
+static const unsigned char PROGMEM TinyLoRa::LoRa_Frequency[8][3] = {
+	{ 0xE1, 0xF9, 0xC0 },		//Channel 0 903.900 MHz / 61.035 Hz = 14809536 = 0xE1F9C0
+	{ 0xE2, 0x06, 0x8C },		//Channel 1 904.100 MHz / 61.035 Hz = 14812812 = 0xE2068C
+	{ 0xE2, 0x13, 0x59},		//Channel 2 904.300 MHz / 61.035 Hz = 14816089 = 0xE21359
+	{ 0xE2, 0x20, 0x26 },		//Channel 3 904.500 MHz / 61.035 Hz = 14819366 = 0xE22026
+	{ 0xE2, 0x2C, 0xF3 },		//Channel 4 904.700 MHz / 61.035 Hz = 14822643 = 0xE22CF3
+	{ 0xE2, 0x39, 0xC0 },		//Channel 5 904.900 MHz / 61.035 Hz = 14825920 = 0xE239C0
+	{ 0xE2, 0x46, 0x8C },		//Channel 6 905.100 MHz / 61.035 Hz = 14829196 = 0xE2468C
+	{ 0xE2, 0x53, 0x59 }		//Channel 7 905.300 MHz / 61.035 Hz = 14832473 = 0xE25359
+};
+#endif
+
+#ifdef AS920
+static const unsigned char PROGMEM TinyLoRa::LoRa_Frequency[8][3] = {
+	{ 0xE6, 0xCC, 0xF4 },		//Channel 0 868.100 MHz / 61.035 Hz = 15125748 = 0xE6CCF4
+	{ 0xE6, 0xD9, 0xC0 },		//Channel 1 868.300 MHz / 61.035 Hz = 15129024 = 0xE6D9C0
+	{ 0xE6, 0x8C, 0xF3 },		//Channel 2 868.500 MHz / 61.035 Hz = 15109363 = 0xE68CF3
+	{ 0xE6, 0x99, 0xC0 },		//Channel 3 867.100 MHz / 61.035 Hz = 15112640 = 0xE699C0
+	{ 0xE6, 0xA6, 0x8D },		//Channel 4 867.300 MHz / 61.035 Hz = 15115917 = 0xE6A68D
+	{ 0xE6, 0xB3, 0x5A },		//Channel 5 867.500 MHz / 61.035 Hz = 15119194 = 0xE6B35A
+	{ 0xE6, 0xC0, 0x27 },		//Channel 6 867.700 MHz / 61.035 Hz = 15122471 = 0xE6C027
+	{ 0xE6, 0x80, 0x27 }		//Channel 7 867.900 MHz / 61.035 Hz = 15106087 = 0xE68027
+};
+#endif
+
 
 /*
 *****************************************************************************************
@@ -52,13 +111,25 @@ static const unsigned char PROGMEM TinyLoRa::S_Table[16][16] = {
 * Description: Function used to initialize the RFM module on startup
 *****************************************************************************************
 */
+
+TinyLoRa::TinyLoRa(int8_t rfm__irq, int8_t rfm_nss) {
+  _irq = rfm__irq;
+  _cs = rfm_nss;
+}
+
 void TinyLoRa::begin() 
 {
+  // RFM95 ss as output
+  pinMode(_cs, OUTPUT);
+
+  // RFM95 _irq as input
+  pinMode(_irq, OUTPUT);
+
   //Switch RFM to sleep
-  RFM_Write(0x01,0x00);
+  RFM_Write(0x01,MODE_SLEEP);
 
   //Set RFM in LoRa mode
-  RFM_Write(0x01,0x80);
+  RFM_Write(0x01,MODE_LORA);
 
   //PA pin (maximal power)
   RFM_Write(0x09,0xFF);
@@ -68,8 +139,8 @@ void TinyLoRa::begin()
 
   //Preamble length set to 8 symbols
   //0x0008 + 4 = 12
-  RFM_Write(0x20,0x00);
-  RFM_Write(0x21,0x08);
+  RFM_Write(REG_PREAMBLE_MSB,0x00);
+  RFM_Write(REG_PREAMBLE_LSB,0x08);
 
   //Low datarate optimization off AGC auto on
   RFM_Write(0x26,0x0C);
@@ -90,7 +161,13 @@ void TinyLoRa::begin()
   // init frame counter
   uint16_t frameCounter = 0x0000;
 
+  // init tx random number for first use
+  uint8_t txrandomNum = 0x00;
+  #ifdef DEBUG
+    Serial.println("* Initialized RFM module");
+  #endif
 }
+
 /*
 *****************************************************************************************
 * Description : Function for sending a package with the RFM
@@ -104,48 +181,70 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
   unsigned char i;
 
   //Set RFM in Standby mode wait on mode ready
-  RFM_Write(0x01,0x81);
+  RFM_Write(MODE_STDBY,0x81);
   
-  // wait for standby mode
-  _delay_ms(10);
+  //wait for standby mode
+  delay(10);
   
-  //Switch DIO0 to TxDone
+  //Switch _irq to TxDone
   RFM_Write(0x40,0x40);
 
-  // change the channel of the RFM module
-  switch (randomNum) {
-      case 0x00: //Channel 0 868.100 MHz / 61.035 Hz = 14222987 = 0xD9068B
-        RFM_Write(0x06,0xD9);
-        RFM_Write(0x07,0x06);
-        RFM_Write(0x08,0x8B);
-        break;
-      case 0x01: //Channel 1 868.300 MHz / 61.035 Hz = 14226264 = 0xD91358
-        RFM_Write(0x06,0xD9);
-        RFM_Write(0x07,0x13);
-        RFM_Write(0x08,0x58);
-        break;
-      case 0x02: //Channel 2 868.500 MHz / 61.035 Hz = 14229540 = 0xD92024
-        RFM_Write(0x06,0xD9);
-        RFM_Write(0x07,0x20);
-        RFM_Write(0x08,0x24);
-        break;
-      case 0x03: //Channel 3 867.100 MHz / 61.035 Hz = 14206603 = 0xD8C68B
-	RFM_Write(0x06,0xD8);
-	RFM_Write(0x07,0xC6);
-	RFM_Write(0x08,0x8B);
-        break;
-  }
-  /*	
-  //SF7 BW 250kHz
-  RFM_Write(0x1E,0x74); //SF7 CRC On
-  RFM_Write(0x1D,0x82); //250 kHz 4/5 coding rate explicit header mode
-  RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
-  */
-  //SF10 BW 125 kHz
-  RFM_Write(0x1E,0xA4); //SF10 CRC On
-  RFM_Write(0x1D,0x72); //125 kHz 4/5 coding rate explicit header mode
-  RFM_Write(0x26,0x04); //Low datarate optimization off AGC auto on
- 
+  // Single-Channel Package Sending
+  #ifdef SINGLECH
+    RFM_Write(RegFrfMsb, 0xE1);
+    RFM_Write(RegFrfMid, 0xF9);
+    RFM_Write(RegFrfLsb, 0xC0);
+  #endif
+
+  // Multi Channel Package Sending
+  #ifdef MULTICH
+    RFM_Write(RegFrfMsb, pgm_read_byte(&(LoRa_Frequency[randomNum][0])));
+    RFM_Write(RegFrfMid, pgm_read_byte(&(LoRa_Frequency[randomNum][1])));
+    RFM_Write(RegFrfLsb, pgm_read_byte(&(LoRa_Frequency[randomNum][2])));
+  #endif
+
+  #ifdef SF12BW125         //SF12 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0xC4); //SF12 CRC On
+    RFM_Write(RegModemConfig1, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x0C); //Low datarate optimization on AGC auto on
+  #endif
+
+  #ifdef SF11BW125         //SF11 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0xB4); //SF11 CRC On
+    RFM_Write(RegModemConfig1, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x0C); //Low datarate optimization on AGC auto on
+  #endif
+
+  #ifdef SF10BW125         //SF10 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0xA4); //SF10 CRC On
+    RFM_Write(RegModemConfig1, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x04); //Low datarate optimization off AGC auto on
+  #endif
+
+  #ifdef SF9BW125          //SF9 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0x94); //SF9 CRC On
+    RFM_Write(0x1D, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x04); //Low datarate optimization off AGC auto on
+  #endif
+
+  #ifdef SF8BW125          //SF8 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0x84); //SF8 CRC On
+    RFM_Write(RegModemConfig1, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x04); //Low datarate optimization off AGC auto on
+  #endif
+
+  #ifdef SF7BW125          //SF7 BW 125 kHz
+    RFM_Write(RegModemConfig2, 0x74); //SF7 CRC On
+    RFM_Write(RegModemConfig1, 0x72); //125 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x04); //Low datarate optimization off AGC auto on
+  #endif
+
+  #ifdef SF7BW250          //SF7 BW 250kHz
+    RFM_Write(RegModemConfig2, 0x74); //SF7 CRC On
+    RFM_Write(RegModemConfig1, 0x82); //250 kHz 4/5 coding rate explicit header mode
+    RFM_Write(RegModemConfig3, 0x04); //Low datarate optimization off AGC auto on
+  #endif 
+
   //Set payload length to the right length
   RFM_Write(0x22,Package_Length);
 
@@ -158,18 +257,18 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
     RFM_Write(0x00,*RFM_Tx_Package);
     RFM_Tx_Package++;
   }
-
   //Switch RFM to Tx
-  RFM_Write(0x01,0x83);
+  RFM_Write(0x01,MODE_TX);
 
-  //Wait for TxDone
-  while(digitalRead(DIO0) == LOW)
+  //Wait _irq to pull high
+  while(digitalRead(_irq) == LOW)
   {
+    
   }
-
   //Switch RFM to sleep
-  RFM_Write(0x01,0x00);
+  RFM_Write(0x01,MODE_SLEEP);
 }
+
 /*
 *****************************************************************************************
 * Description : Funtion that writes a register from the RFM
@@ -180,16 +279,21 @@ void TinyLoRa::RFM_Send_Package(unsigned char *RFM_Tx_Package, unsigned char Pac
 */
 void TinyLoRa::RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data) 
 {
-  //Set NSS pin Low to start communication
-  digitalWrite(NSS_RFM,LOW);
+  #ifdef DEBUG
+    Serial.print("* SPI Write | Address: ");Serial.print(RFM_Address, HEX);
+    Serial.print(" | DATA: ");Serial.println(RFM_Data, HEX);
+  #endif
 
-  //Send Addres with MSB 1 to make it a writ command
+  //Set NSS pin Low to start communication
+  digitalWrite(_cs, 0);
+
+  //Send Address with MSB 1 to make it a write command
   SPI.transfer(RFM_Address | 0x80);
   //Send Data
   SPI.transfer(RFM_Data);
 
   //Set NSS pin High to end communication
-  digitalWrite(NSS_RFM,HIGH);
+  digitalWrite(_cs, 1);
 }
 /*
 *****************************************************************************************
@@ -202,6 +306,7 @@ void TinyLoRa::RFM_Write(unsigned char RFM_Address, unsigned char RFM_Data)
 */
 void TinyLoRa::sendData(unsigned char *Data, unsigned char Data_Length, unsigned int Frame_Counter_Tx)
 {
+  
   //Define variables
   unsigned char i;
 
@@ -225,17 +330,13 @@ void TinyLoRa::sendData(unsigned char *Data, unsigned char Data_Length, unsigned
   
   //Build the Radio Package
   RFM_Data[0] = Mac_Header;
-
   RFM_Data[1] = DevAddr[3];
   RFM_Data[2] = DevAddr[2];
   RFM_Data[3] = DevAddr[1];
   RFM_Data[4] = DevAddr[0];
-
   RFM_Data[5] = Frame_Control;
-
   RFM_Data[6] = (Frame_Counter_Tx & 0x00FF);
   RFM_Data[7] = ((Frame_Counter_Tx >> 8) & 0x00FF);
-
   RFM_Data[8] = Frame_Port;
 
   //Set Current package length
@@ -249,6 +350,10 @@ void TinyLoRa::sendData(unsigned char *Data, unsigned char Data_Length, unsigned
 
   //Add data Lenth to package length
   RFM_Package_Length = RFM_Package_Length + Data_Length;
+  #ifdef DEBUG
+    Serial.print("Package length: ");
+    Serial.println(RFM_Package_Length);
+  #endif
   
   //Calculate MIC
   Calculate_MIC(RFM_Data, MIC, RFM_Package_Length, Frame_Counter_Tx, Direction);
@@ -264,6 +369,9 @@ void TinyLoRa::sendData(unsigned char *Data, unsigned char Data_Length, unsigned
  
   //Send Package
   RFM_Send_Package(RFM_Data, RFM_Package_Length);
+  #ifdef DEBUG
+    Serial.println("sent package!");
+  #endif
 }
 /*
 *****************************************************************************************
@@ -512,7 +620,12 @@ void TinyLoRa::Calculate_MIC(unsigned char *Data, unsigned char *Final_MIC, unsi
   Final_MIC[2] = New_Data[2];
   Final_MIC[3] = New_Data[3];
 	
-  randomNum = Final_MIC[3] & 0x03;
+  // Generate a random number between 0 and 7 to select next transmit channel 
+  randomNum = Final_MIC[3] & 0x07;
+
+  // Generate a random number between 0 and 7 to randomise next transmit message schedule
+  txrandomNum = Final_MIC[2] & 0x07;
+
 }
 /*
 *****************************************************************************************
